@@ -1,0 +1,17 @@
+namespace entity.fbs;
+
+table FUser {
+	displayName: string;
+	mid: string;
+	pictureUrl: string;
+}
+
+table FFriends {
+	members: [FUser];
+}
+
+table FToken {
+	id: int;
+	accessToken: string;
+	created: long;
+}
