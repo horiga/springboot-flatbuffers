@@ -1,0 +1,78 @@
+# Reference : https://github.com/github/gitignore
+
+# ------------------------------
+# Java.gitignore
+# ------------------------------
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# ------------------------------
+# Maven.gitignore
+# ------------------------------
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.next
+release.properties
+
+# ------------------------------
+# Global/Eclipse.gitignore
+# ------------------------------
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin 
+.target
+
+# TeXlipse plugin
+.texlipse
+
+# ------------------------------
+# LINEGAME local
+# ------------------------------
+.classpath
+.project
+.springBeans
+/repository/
+/logs/
+
+# ------------------------------
+# OS generated files
+# ------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
