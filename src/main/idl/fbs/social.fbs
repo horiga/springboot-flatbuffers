@@ -1,4 +1,6 @@
-namespace entity.fbs;
+include "scheme.fbs";
+namespace entity.fbs.social;
+
 
 table FUser {
 	displayName: string;
@@ -10,8 +12,3 @@ table FFriends {
 	members: [FUser];
 }
 
-table FToken {
-	id: int;
-	accessToken: string;
-	created: long;
-}

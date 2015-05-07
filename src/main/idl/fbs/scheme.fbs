@@ -1,0 +1,30 @@
+namespace entity.fbs;
+
+enum Status: byte { RED=1, YELLOW, GREEN }
+
+table FDemo {
+	point: short;
+	score: double;
+	flags: bool = false;
+}
+
+union Any { Error, Success }
+
+table Error {
+	code: string;
+	message: string;
+}
+
+table Success {
+}
+
+table FResponse {
+	status: Status = RED;
+	result: Any;
+}
+
+table FToken {
+	id: int;
+	accessToken: string;
+	created: long;
+}
