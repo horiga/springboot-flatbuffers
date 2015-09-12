@@ -1,12 +1,13 @@
 // automatically generated, do not modify
 
-package entity.fbs;
+package org.horiga.study.springboot.flatbuffers.protocol.messages;
 
 import java.nio.*;
 import java.lang.*;
 import java.util.*;
 import com.google.flatbuffers.*;
 
+@SuppressWarnings("unused")
 public final class Error extends Table {
   public static Error getRootAsError(ByteBuffer _bb) { return getRootAsError(_bb, new Error()); }
   public static Error getRootAsError(ByteBuffer _bb, Error obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__init(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }

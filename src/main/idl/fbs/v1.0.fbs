@@ -1,0 +1,76 @@
+namespace org.horiga.study.springboot.flatbuffers.protocol.messages;
+
+table Demo {
+	point: short;
+	score: double;
+	flags: bool = false;
+}
+
+table Token {
+	id: int;
+	accessToken: string;
+	created: long;
+}
+
+table PagerCondition {
+	start: int;
+	count: int;
+	filterBy: string;
+	filterValue: string;
+}
+
+// fetch @me
+table Me {
+	token: Token;
+}
+
+table User {
+	token: Token;
+	ids: [string];
+}
+
+table Friends {
+	token: Token;
+	condition: PagerCondition;
+}
+
+table Score {
+	mi: int = 2;
+	factor: string;
+	score: double;
+}
+
+table MessagePlaceholderKeyValuePair {
+	key: string;
+	value: string;
+}
+
+table TextMessage {
+	id: string;
+	to: [string];
+	placeholders: [MessagePlaceholderKeyValuePair];
+}
+
+// response
+table Error {
+	code: string;
+	message: string;
+}
+
+table TokenAnswer {
+	token: Token;
+	expired: long;
+}
+
+table UserAnswer {
+	displayName: string;
+	mid: string;
+	pictureUrl: string;
+}
+
+table FriendsAnswer {
+	total: int;
+	start: int;
+	count: int;
+	members: [User];
+}

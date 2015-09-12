@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.horiga.study.springboot.flatbuffers.protocol.messages.Me;
+import org.horiga.study.springboot.flatbuffers.protocol.messages.Score;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,6 +19,7 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.List;
+import java.util.Map;
 
 @SpringBootApplication
 @Slf4j
@@ -39,7 +43,15 @@ public class Application extends WebMvcConfigurerAdapter {
 
     @Bean
     FlatBuffersHttpMessageConverter flatBuffersHttpMessageConverter() {
-        return new FlatBuffersHttpMessageConverter(null);
+        try {
+            Map<String, FMessage> repo = Maps.newHashMap();
+            repo.put("1", new FMessage("1", Me.class));
+            repo.put("2", new FMessage("2", Score.class));
+
+            return new FlatBuffersHttpMessageConverter(repo);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -1,8 +1,6 @@
 package org.horiga.study.springboot.flatbuffers;
 
-import com.google.common.collect.Maps;
 import com.google.flatbuffers.Table;
-import entity.fbs.social.FUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -14,12 +12,10 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
 /**
  *
@@ -53,21 +49,22 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 	protected Table readInternal(Class<? extends Table> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		final String fbMessageId = inputMessage.getHeaders().getFirst(X_FLATBUFFERS_MESSAGE_ID);
-		if(!messageRepository.containsKey(fbMessageId)) {
-			throw new HttpMessageNotReadableException("");
+		final String messageId = inputMessage.getHeaders().getFirst(X_FLATBUFFERS_MESSAGE_ID);
+		if(Objects.isNull(messageId) ||
+				!messageRepository.containsKey(messageId)) {
+			throw new HttpMessageNotReadableException("Unknown message protocol identifier");
 		}
 
 		final InputStream stream = inputMessage.getBody();
 		int available = stream.available();
 		if( available > maxReadableBytes) {
-			throw new HttpMessageNotReadableException("");
+			throw new HttpMessageNotReadableException("Message size too large. " + available + " bytes.");
 		}
 
 		byte[] readBytes = new byte[available];
 		stream.read(readBytes);
 
-		return messageRepository.get(fbMessageId).build(ByteBuffer.wrap(readBytes));
+		return messageRepository.get(messageId).build(ByteBuffer.wrap(readBytes));
 	}
 
 	@Override

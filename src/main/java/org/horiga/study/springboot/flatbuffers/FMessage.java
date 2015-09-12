@@ -21,7 +21,7 @@ public class FMessage {
 	public FMessage(String id, Class<? extends Table> klass) throws Exception {
 		this.id = id;
 		this.klass = klass;
-		Method m = klass.getMethod("getRootAs" + klass.getSimpleName());
+		final Method m = klass.getMethod("getRootAs" + klass.getSimpleName(), ByteBuffer.class);
 		Preconditions.checkArgument(m != null, "This message is not FlatBuffers message");
 		this.buildMethod = m;
 	}
