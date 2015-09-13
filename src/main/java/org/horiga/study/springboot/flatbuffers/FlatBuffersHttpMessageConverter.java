@@ -7,11 +7,14 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -50,6 +53,7 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 			throws IOException, HttpMessageNotReadableException {
 
 		final String messageId = inputMessage.getHeaders().getFirst(X_FLATBUFFERS_MESSAGE_ID);
+		log.debug("Request.messageId: {}", messageId);
 		if(Objects.isNull(messageId) ||
 				!messageRepository.containsKey(messageId)) {
 			throw new HttpMessageNotReadableException("Unknown message protocol identifier");
@@ -69,7 +73,14 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 
 	@Override
 	protected void writeInternal(Table message, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-
+		MediaType contentType = outputMessage.getHeaders().getContentType();
+		log.debug("Response.contentType: {}", contentType);
+		if (X_FLATBUFFERS.isCompatibleWith(contentType)) {
+			FileCopyUtils.copy(message.getByteBuffer().array(), outputMessage.getBody());
+			message.getByteBuffer();
+		} else {
+			log.info("This response is not FlatBuffers type.");
+		}
 	}
 
 	private Charset getCharset(HttpHeaders headers) {

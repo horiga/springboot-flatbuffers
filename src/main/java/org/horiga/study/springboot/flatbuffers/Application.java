@@ -8,11 +8,13 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.horiga.study.springboot.flatbuffers.protocol.messages.Me;
 import org.horiga.study.springboot.flatbuffers.protocol.messages.Score;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletContainerFactory;
+import org.springframework.boot.context.embedded.jetty.JettyServerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
@@ -20,6 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @SpringBootApplication
 @Slf4j
@@ -62,5 +65,26 @@ public class Application extends WebMvcConfigurerAdapter {
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         configurer.defaultContentType(FlatBuffersHttpMessageConverter.X_FLATBUFFERS);
+    }
+
+    // Withdraw Server header directives.
+    @Bean
+    JettyServerCustomizer jettyServerCustomizer() {
+        return server -> {
+            Stream.of(server.getConnectors())
+                    .flatMap(conn -> conn.getConnectionFactories().stream())
+                    .flatMap(f -> (f instanceof HttpConnectionFactory) ?
+                            Stream.of((HttpConnectionFactory) f) : Stream.empty())
+                    .forEach(f -> f.getHttpConfiguration().setSendServerVersion(false));
+        };
+    }
+
+    @Bean
+    JettyEmbeddedServletContainerFactory jettyEmbeddedServletContainerFactory(
+            JettyServerCustomizer[] customizer
+    ) {
+        JettyEmbeddedServletContainerFactory factory = new JettyEmbeddedServletContainerFactory();
+        factory.addServerCustomizers(customizer);
+        return factory;
     }
 }
