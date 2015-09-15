@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -72,7 +73,6 @@ public class WebIntegrationTest {
 		log.info("RESPONSE >>>>>>>>>>>>");
 		Utils.hex(res_bb);
 		log.info("RESPONSE <<<<<<<<<<<<");
-
 
 		UserAnswer answer = UserAnswer.getRootAsUserAnswer(res_bb);
 

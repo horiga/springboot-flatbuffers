@@ -81,7 +81,12 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		log.debug("Response.contentType: {}", contentType);
 		if (X_FLATBUFFERS.isCompatibleWith(contentType)) {
-			FileCopyUtils.copy(message.getByteBuffer().array(), outputMessage.getBody());
+			ByteBuffer writeBuffer = message.getByteBuffer();
+
+			log.info("WRITE RESPONSE ------");
+			Utils.hex(writeBuffer);
+			log.info("WRITE RESPONSE ------");
+			FileCopyUtils.copy(writeBuffer.array(), outputMessage.getBody());
 		} else {
 			log.info("This response is not FlatBuffers type.");
 		}
