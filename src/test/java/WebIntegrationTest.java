@@ -69,10 +69,20 @@ public class WebIntegrationTest {
 		log.info("res.status: {}", res.getStatusCode());
 
 		ByteBuffer res_bb = res.getResponseBodyAsByteBuffer();
-
 		log.info("RESPONSE >>>>>>>>>>>>");
 		Utils.hex(res_bb);
 		log.info("RESPONSE <<<<<<<<<<<<");
+		log.info("position: {}", res_bb.position());
+
+		byte[] bytes = res_bb.array();
+		int n  = 0;
+		for (; n<bytes.length; n++) {
+			if( bytes[n]!=0 ) {
+				break;
+			}
+		}
+		log.info("nnnn: {}", n);
+		res_bb.position(n);
 
 		UserAnswer answer = UserAnswer.getRootAsUserAnswer(res_bb);
 

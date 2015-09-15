@@ -83,9 +83,11 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 		if (X_FLATBUFFERS.isCompatibleWith(contentType)) {
 			ByteBuffer writeBuffer = message.getByteBuffer();
 
-			log.info("WRITE RESPONSE ------");
+			log.info("WRITE RESPONSE ------ pos:{}", writeBuffer.position());
+
 			Utils.hex(writeBuffer);
 			log.info("WRITE RESPONSE ------");
+			// position から書き込む
 			FileCopyUtils.copy(writeBuffer.array(), outputMessage.getBody());
 		} else {
 			log.info("This response is not FlatBuffers type.");

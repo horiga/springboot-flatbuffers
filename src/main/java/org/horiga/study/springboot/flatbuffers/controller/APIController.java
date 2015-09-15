@@ -5,7 +5,10 @@ import com.google.flatbuffers.Table;
 import lombok.extern.slf4j.Slf4j;
 import org.horiga.study.springboot.flatbuffers.protocol.messages.Me;
 import org.horiga.study.springboot.flatbuffers.protocol.messages.UserAnswer;
+import org.horiga.study.springboot.flatbuffers.util.Utils;
 import org.springframework.web.bind.annotation.*;
+
+import java.nio.ByteBuffer;
 
 @RestController
 @Slf4j
@@ -39,7 +42,15 @@ public class APIController {
 				fbb.createString("Hiroyuki Horigami"),
 				fbb.createString("12345"),
 				fbb.createString("//scontent-nrt1-1.xx.fbcdn.net/hphotos-xpa1/t31.0-8/891598_504258659637103_960802615_o.jpg")));
+		UserAnswer answer = UserAnswer.getRootAsUserAnswer(fbb.dataBuffer());
+		ByteBuffer bb = answer.getByteBuffer();
+		log.info("####################");
+		Utils.hex(bb);
+		log.info("####################");
+		log.info("bb.position:{}", bb.position());
+		UserAnswer bbb = UserAnswer.getRootAsUserAnswer(bb);
+		log.info("displayName:{}", bbb.displayName());
 
-		return UserAnswer.getRootAsUserAnswer(fbb.dataBuffer());
+		return bbb;
 	}
 }
