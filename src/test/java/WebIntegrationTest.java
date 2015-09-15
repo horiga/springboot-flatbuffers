@@ -102,6 +102,4 @@ public class WebIntegrationTest {
 
 		return ByteBuffer.wrap(fbb.sizedByteArray());
 	}
-
-
 }
