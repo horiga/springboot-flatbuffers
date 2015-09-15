@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 
 @Getter
 @ToString(callSuper = false, includeFieldNames = true)
-public class FMessage {
+public class FlatBuffersMessage {
 
 	private final String id;
 
@@ -18,7 +18,7 @@ public class FMessage {
 
 	private final Method buildMethod;
 
-	public FMessage(String id, Class<? extends Table> klass) throws Exception {
+	public FlatBuffersMessage(String id, Class<? extends Table> klass) throws Exception {
 		this.id = id;
 		this.klass = klass;
 		final Method m = klass.getMethod("getRootAs" + klass.getSimpleName(), ByteBuffer.class);
@@ -27,11 +27,11 @@ public class FMessage {
 	}
 
 	public Table build(final ByteBuffer bytes)
-			throws FlatBuffersMessageException {
+			throws FlatBuffersMessageProtocolException {
 		try {
 			return (Table) this.buildMethod.invoke(klass, bytes);
 		} catch (Exception e) {
-			throw new FlatBuffersMessageException("", e);
+			throw new FlatBuffersMessageProtocolException("Unavailable flatbuffers message.", e);
 		}
 	}
 }

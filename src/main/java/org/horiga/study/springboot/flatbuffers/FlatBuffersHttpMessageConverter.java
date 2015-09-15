@@ -2,19 +2,21 @@ package org.horiga.study.springboot.flatbuffers;
 
 import com.google.flatbuffers.Table;
 import lombok.extern.slf4j.Slf4j;
+import org.horiga.study.springboot.flatbuffers.util.Utils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.util.FileCopyUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -30,15 +32,15 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 
 	public static final MediaType X_FLATBUFFERS = new MediaType("application", "x-fb", DEFAULT_CHARSET);
 
-	public static final String X_FLATBUFFERS_MESSAGE_ID = "X-FlatBuffers-MessageId";
+	public static final String X_FLATBUFFERS_MESSAGE_ID = "X-FBS-MessageId";
 
 	public static final int MAX_MESSAGE_BYTES = 1024 * 10;
 
 	private int maxReadableBytes = MAX_MESSAGE_BYTES;
 
-	protected final Map<String, FMessage> messageRepository;
+	protected final Map<String, FlatBuffersMessage> messageRepository;
 
-	public FlatBuffersHttpMessageConverter(Map<String, FMessage> messageRepository) {
+	public FlatBuffersHttpMessageConverter(Map<String, FlatBuffersMessage> messageRepository) {
 		super(X_FLATBUFFERS);
 		this.messageRepository = messageRepository;
 	}
@@ -60,15 +62,18 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 		}
 
 		final InputStream stream = inputMessage.getBody();
-		int available = stream.available();
-		if( available > maxReadableBytes) {
-			throw new HttpMessageNotReadableException("Message size too large. " + available + " bytes.");
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		byte[] readBytes = new byte[256];
+		while(true) {
+			int len = stream.read(readBytes);
+			if( len < 0) break;
+			out.write(readBytes, 0, len);
 		}
+		ByteBuffer bb = ByteBuffer.wrap(out.toByteArray());
+		out.close();
+		Utils.hex(bb);
 
-		byte[] readBytes = new byte[available];
-		stream.read(readBytes);
-
-		return messageRepository.get(messageId).build(ByteBuffer.wrap(readBytes));
+		return messageRepository.get(messageId).build(bb);
 	}
 
 	@Override

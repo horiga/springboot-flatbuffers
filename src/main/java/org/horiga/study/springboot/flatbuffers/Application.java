@@ -47,9 +47,9 @@ public class Application extends WebMvcConfigurerAdapter {
     @Bean
     FlatBuffersHttpMessageConverter flatBuffersHttpMessageConverter() {
         try {
-            Map<String, FMessage> repo = Maps.newHashMap();
-            repo.put("1", new FMessage("1", Me.class));
-            repo.put("2", new FMessage("2", Score.class));
+            Map<String, FlatBuffersMessage> repo = Maps.newHashMap();
+            repo.put("1", new FlatBuffersMessage("1", Me.class));
+            repo.put("2", new FlatBuffersMessage("2", Score.class));
 
             return new FlatBuffersHttpMessageConverter(repo);
         } catch (Exception e) {

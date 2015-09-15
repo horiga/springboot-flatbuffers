@@ -90,6 +90,12 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.ning</groupId>
+			<artifactId>async-http-client</artifactId>
+			<version>1.9.31</version>
+		</dependency>
+
 	</dependencies>
 	
 	<build>
