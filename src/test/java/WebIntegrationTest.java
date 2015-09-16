@@ -1,7 +1,6 @@
 import com.google.flatbuffers.FlatBufferBuilder;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.ListenableFuture;
 import com.ning.http.client.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.horiga.study.springboot.flatbuffers.Application;
@@ -9,7 +8,6 @@ import org.horiga.study.springboot.flatbuffers.FlatBuffersHttpMessageConverter;
 import org.horiga.study.springboot.flatbuffers.protocol.messages.Me;
 import org.horiga.study.springboot.flatbuffers.protocol.messages.Token;
 import org.horiga.study.springboot.flatbuffers.protocol.messages.UserAnswer;
-import org.horiga.study.springboot.flatbuffers.util.Utils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
