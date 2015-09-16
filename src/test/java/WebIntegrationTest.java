@@ -21,10 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -47,33 +44,34 @@ public class WebIntegrationTest {
 	FlatBuffersHttpMessageConverter flatBuffersHttpMessageConverter;
 
 	@After
-	public void tearDown() {}
+	public void tearDown() {
+	}
 
 	@Test
 	public void test_flatbuffers_simple() throws Exception {
 
-		ByteBuffer in_bb = me();
-		Utils.hex(in_bb);
-
-		AsyncHttpClient hc = new AsyncHttpClient(
+		AsyncHttpClient httpclient = new AsyncHttpClient(
 				new AsyncHttpClientConfig.Builder().setRequestTimeout(3000).build());
-		ListenableFuture<Response> f = hc.preparePost("http://localhost:18080/api")
+
+		final Response res = httpclient.preparePost("http://localhost:18080/api")
 				.addHeader("Content-Type", "application/x-fb")
 				.addHeader("X-FBS-MessageId", "1")
-				.setBody(in_bb.array())
+				.setBody(me().array())
 				.setBodyEncoding("UTF-8")
-				.execute();
-		Response res = f.get(3000, TimeUnit.MILLISECONDS);
+				.execute()
+				.get(3000, TimeUnit.MILLISECONDS);
 
 		log.info("res.contentType:{}", res.getContentType());
 		log.info("res.status: {}", res.getStatusCode());
 
 		UserAnswer answer = UserAnswer.getRootAsUserAnswer(res.getResponseBodyAsByteBuffer());
 
+		httpclient.close();
+
 		log.info("answer.displayName:{}", answer.displayName());
 		log.info("answer.mid:{}", answer.mid());
+		log.info("answer.pictureUrl:{}", answer.pictureUrl());
 
-		hc.close();
 	}
 
 	private static ByteBuffer me() throws Exception {
@@ -87,12 +85,11 @@ public class WebIntegrationTest {
 		Token.addAccessToken(fbb, accessTokenOffset);
 		Token.addCreated(fbb, System.currentTimeMillis());
 		int tokenOffset = Token.endToken(fbb);
-		log.info("token.offset={}", tokenOffset);
 
 		Me.startMe(fbb);
 		Me.addToken(fbb, tokenOffset);
-		int meOffset = Me.endMe(fbb);
-		fbb.finish(meOffset);
+		int offset = Me.endMe(fbb);
+		fbb.finish(offset);
 
 		return ByteBuffer.wrap(fbb.sizedByteArray());
 	}

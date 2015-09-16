@@ -3,7 +3,6 @@ package org.horiga.study.springboot.flatbuffers;
 import com.google.flatbuffers.Table;
 import lombok.extern.slf4j.Slf4j;
 import org.horiga.study.springboot.flatbuffers.util.Utils;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -49,6 +48,7 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 
 		final String messageId = inputMessage.getHeaders().getFirst(X_FLATBUFFERS_MESSAGE_ID);
 		log.debug("Request.messageId: {}", messageId);
+
 		if(Objects.isNull(messageId) ||
 				!messageRepository.containsKey(messageId)) {
 			throw new HttpMessageNotReadableException("Unknown message protocol identifier");
@@ -58,40 +58,27 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 		final ByteArrayOutputStream out =
 				new ByteArrayOutputStream(contentLength >= 0 ? (int) contentLength : StreamUtils.BUFFER_SIZE);
 		StreamUtils.copy(inputMessage.getBody(), out);
-		final ByteBuffer bb = ByteBuffer.wrap(out.toByteArray());
 
-		Utils.hex(bb);
-
-		return messageRepository.get(messageId).build(bb);
+		return messageRepository.get(messageId).build(ByteBuffer.wrap(out.toByteArray()));
 	}
 
 	@Override
 	protected void writeInternal(Table message, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-		ByteBuffer writeBuffer = message.getByteBuffer();
-
 		setFlatBuffersResponseHeaders(message, outputMessage);
 
-		Long size = this.getContentLength(message, X_FLATBUFFERS);
-		byte[] dst = new byte[size.intValue()];
-		writeBuffer.get(dst);
-
-		log.info("buffer.size:{}", size);
-		log.info("http.response.contentLength:{}", outputMessage.getHeaders().getContentLength());
+		final byte[] dst = new byte[getContentLength(message, X_FLATBUFFERS).intValue()];
+		message.getByteBuffer().get(dst);
 
 		StreamUtils.copy(dst, outputMessage.getBody());
 	}
 
 	@Override
 	protected Long getContentLength(Table table, MediaType contentType) throws IOException {
-		ByteBuffer bb = table.getByteBuffer();
-		Long contentLength = (long) (bb.limit() - bb.position());
-		log.info("calculate contentLength: {}", contentLength);
-		return contentLength;
+		final ByteBuffer buf = table.getByteBuffer();
+		return (long) (buf.limit() - buf.position());
 	}
 
 	private void setFlatBuffersResponseHeaders(final Table message, final HttpOutputMessage outputMessage) {
 		// debug
-
-
 	}
 }
