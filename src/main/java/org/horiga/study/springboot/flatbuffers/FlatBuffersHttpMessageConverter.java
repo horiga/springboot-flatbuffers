@@ -10,13 +10,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -33,10 +30,6 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 	public static final MediaType X_FLATBUFFERS = new MediaType("application", "x-fb", DEFAULT_CHARSET);
 
 	public static final String X_FLATBUFFERS_MESSAGE_ID = "X-FBS-MessageId";
-
-	public static final int MAX_MESSAGE_BYTES = 1024 * 10;
-
-	private int maxReadableBytes = MAX_MESSAGE_BYTES;
 
 	protected final Map<String, FlatBuffersMessage> messageRepository;
 
@@ -61,16 +54,12 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 			throw new HttpMessageNotReadableException("Unknown message protocol identifier");
 		}
 
-		final InputStream stream = inputMessage.getBody();
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		byte[] readBytes = new byte[256];
-		while(true) {
-			int len = stream.read(readBytes);
-			if( len < 0) break;
-			out.write(readBytes, 0, len);
-		}
-		ByteBuffer bb = ByteBuffer.wrap(out.toByteArray());
-		out.close();
+		final long contentLength = inputMessage.getHeaders().getContentLength();
+		final ByteArrayOutputStream out =
+				new ByteArrayOutputStream(contentLength >= 0 ? (int) contentLength : StreamUtils.BUFFER_SIZE);
+		StreamUtils.copy(inputMessage.getBody(), out);
+		final ByteBuffer bb = ByteBuffer.wrap(out.toByteArray());
+
 		Utils.hex(bb);
 
 		return messageRepository.get(messageId).build(bb);
@@ -78,31 +67,31 @@ public class FlatBuffersHttpMessageConverter extends AbstractHttpMessageConverte
 
 	@Override
 	protected void writeInternal(Table message, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-		MediaType contentType = outputMessage.getHeaders().getContentType();
-		log.debug("Response.contentType: {}", contentType);
-		if (X_FLATBUFFERS.isCompatibleWith(contentType)) {
-			ByteBuffer writeBuffer = message.getByteBuffer();
+		ByteBuffer writeBuffer = message.getByteBuffer();
 
-			log.info("WRITE RESPONSE ------ pos:{}", writeBuffer.position());
+		setFlatBuffersResponseHeaders(message, outputMessage);
 
-			Utils.hex(writeBuffer);
-			log.info("WRITE RESPONSE ------");
-			// position から書き込む
-			FileCopyUtils.copy(writeBuffer.array(), outputMessage.getBody());
-		} else {
-			log.info("This response is not FlatBuffers type.");
-		}
+		Long size = this.getContentLength(message, X_FLATBUFFERS);
+		byte[] dst = new byte[size.intValue()];
+		writeBuffer.get(dst);
+
+		log.info("buffer.size:{}", size);
+		log.info("http.response.contentLength:{}", outputMessage.getHeaders().getContentLength());
+
+		StreamUtils.copy(dst, outputMessage.getBody());
 	}
 
-	private Charset getCharset(HttpHeaders headers) {
-		if (headers == null || headers.getContentType() == null || headers.getContentType().getCharSet() == null) {
-			return DEFAULT_CHARSET;
-		}
-		return headers.getContentType().getCharSet();
+	@Override
+	protected Long getContentLength(Table table, MediaType contentType) throws IOException {
+		ByteBuffer bb = table.getByteBuffer();
+		Long contentLength = (long) (bb.limit() - bb.position());
+		log.info("calculate contentLength: {}", contentLength);
+		return contentLength;
 	}
 
-	public void setMaxReadableBytes(int max) {
-		this.maxReadableBytes = max;
-	}
+	private void setFlatBuffersResponseHeaders(final Table message, final HttpOutputMessage outputMessage) {
+		// debug
 
+
+	}
 }
