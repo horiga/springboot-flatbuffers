@@ -2,7 +2,6 @@ package org.horiga.study.springboot.flatbuffers;
 
 import com.google.flatbuffers.Table;
 import lombok.extern.slf4j.Slf4j;
-import org.horiga.study.springboot.flatbuffers.util.Utils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
