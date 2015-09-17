@@ -1,0 +1,53 @@
+namespace org.horiga.study.springboot.flatbuffers.protocol.messages.v2;
+
+enum MessageId: int {
+	OK = 0, FAILED, TOKEN, PERSON, FRIENDS
+}
+
+union RequestBody {
+	Pager
+}
+
+union ResponseBody {
+	Error, Person, Friends
+}
+
+table Token {
+	token: string;
+}
+
+table Error {
+	code: int;
+	detail: string;
+}
+
+table Request {
+	msg: MessageId;
+	token: Token;
+	body: RequestBody;
+}
+
+table Response {
+	msg: MessageId;
+	body: ResponseBody;
+}
+
+table Person {
+	userId: string;
+	displayName: string;
+	thumbnail: string;
+}
+
+table Pager {
+	offset: int;
+	limit: int;
+}
+
+table Friends {
+	total: int;
+	offset: int;
+	limit: int;
+	entity: [Person];
+}
+
+
