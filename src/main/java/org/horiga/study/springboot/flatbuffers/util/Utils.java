@@ -7,7 +7,8 @@ import java.nio.ByteBuffer;
 @Slf4j
 public final class Utils {
 
-	public static void hex(ByteBuffer bb) {
+
+	public static ByteBuffer hex(ByteBuffer bb, String message) {
 		StringBuilder sb = new StringBuilder();
 		int n = 1;
 		for (byte b : bb.array()) {
@@ -20,7 +21,14 @@ public final class Utils {
 			n++;
 
 		}
-		log.info("\n{}", sb.toString());
+		log.info("\n>>>>>>>>> [{}] - pos:{}, limit:{}, cap:{}\n{}\n<<<<<<<<< [{}]",
+				message, bb.position(), bb.limit(), bb.capacity(), sb.toString(), message);
+		return bb;
+	}
+
+	public static ByteBuffer hex(ByteBuffer bb) {
+		hex(bb, "to hex");
+		return bb;
 	}
 
 }
